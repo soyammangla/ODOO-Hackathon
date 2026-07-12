@@ -1,0 +1,3 @@
+EcoSphere/backend/.env
+**/node_modules/
+**/.env
