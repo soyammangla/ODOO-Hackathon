@@ -1,2 +1,0 @@
-# ODOO-Hackathon
-Hackathon Project
