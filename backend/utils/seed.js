@@ -10,6 +10,14 @@ const Badge = require("../models/Badge");
 const Reward = require("../models/Reward");
 const EnvironmentalGoal = require("../models/EnvironmentalGoal");
 const OrgConfig = require("../models/OrgConfig");
+const CSRActivity = require("../models/CSRActivity");
+const Challenge = require("../models/Challenge");
+const ESGPolicy = require("../models/ESGPolicy");
+const PolicyAcknowledgement = require("../models/PolicyAcknowledgement");
+const Audit = require("../models/Audit");
+const ComplianceIssue = require("../models/ComplianceIssue");
+const TrainingCompletion = require("../models/TrainingCompletion");
+const EmployeeParticipation = require("../models/EmployeeParticipation");
 
 async function seed() {
   await connectDB();
@@ -24,6 +32,13 @@ async function seed() {
     Reward.deleteMany({}),
     EnvironmentalGoal.deleteMany({}),
     OrgConfig.deleteMany({}),
+    CSRActivity.deleteMany({}),
+    Challenge.deleteMany({}),
+    ESGPolicy.deleteMany({}),
+    PolicyAcknowledgement.deleteMany({}),
+    Audit.deleteMany({}),
+    ComplianceIssue.deleteMany({}),
+    TrainingCompletion.deleteMany({}),
   ]);
 
   const manufacturing = await Department.create({ name: "Manufacturing", code: "MFG", employeeCount: 120 });
@@ -46,7 +61,7 @@ async function seed() {
     department: admin._id,
   });
 
-  await User.create({
+  const priya = await User.create({
     name: "Priya Sharma",
     email: "priya@ecosphere.com",
     password: "password123",
@@ -57,7 +72,7 @@ async function seed() {
     points: 320,
   });
 
-  await User.create({
+  const arjun = await User.create({
     name: "Arjun Mehta",
     email: "arjun@ecosphere.com",
     password: "password123",
@@ -127,6 +142,128 @@ async function seed() {
     startDate: new Date("2026-01-01"),
     targetDate: new Date("2026-12-31"),
     status: "OnTrack",
+  });
+
+  // ---- Social module sample data ----
+  const treePlantation = await CSRActivity.create({
+    title: "Tree plantation drive",
+    category: csrCategory._id,
+    description: "Plant saplings around the manufacturing campus",
+    department: manufacturing._id,
+    location: "Manufacturing campus, Gate 2",
+    scheduledDate: new Date("2026-07-20"),
+    pointsPerParticipation: 25,
+    evidenceRequired: true,
+    status: "Planned",
+    createdBy: manager1._id,
+  });
+
+  await CSRActivity.create({
+    title: "Blood donation camp",
+    category: csrCategory._id,
+    description: "Partnered with local hospital for a donation drive",
+    department: admin._id,
+    location: "Admin block, ground floor",
+    scheduledDate: new Date("2026-06-15"),
+    pointsPerParticipation: 20,
+    evidenceRequired: false,
+    status: "Completed",
+    createdBy: manager1._id,
+  });
+
+  await EmployeeParticipation.create({
+    employee: priya._id,
+    activity: treePlantation._id,
+    approvalStatus: "Pending",
+  });
+
+  await Challenge.create({
+    title: "Zero-waste week",
+    category: challengeCategory._id,
+    description: "Reduce office waste to zero for 5 working days",
+    xp: 80,
+    difficulty: "Medium",
+    evidenceRequired: true,
+    deadline: new Date("2026-08-01"),
+    status: "Active",
+    createdBy: manager1._id,
+  });
+
+  await Challenge.create({
+    title: "Cycle to work",
+    category: challengeCategory._id,
+    description: "Log 20 commutes by bike or on foot this quarter",
+    xp: 60,
+    difficulty: "Easy",
+    evidenceRequired: false,
+    deadline: new Date("2026-09-30"),
+    status: "Active",
+    createdBy: manager1._id,
+  });
+
+  await TrainingCompletion.create({
+    employee: priya._id,
+    trainingName: "Workplace safety fundamentals",
+    status: "Completed",
+    completedDate: new Date("2026-05-10"),
+  });
+
+  await TrainingCompletion.create({
+    employee: arjun._id,
+    trainingName: "Anti-harassment policy training",
+    status: "Assigned",
+  });
+
+  // ---- Governance module sample data ----
+  const dataPolicy = await ESGPolicy.create({
+    title: "Data privacy and confidentiality policy",
+    category: "Governance",
+    description: "Guidelines on handling employee and customer data",
+    version: "2.0",
+    effectiveDate: new Date("2026-01-01"),
+    mandatory: true,
+    status: "Active",
+  });
+
+  await PolicyAcknowledgement.create({ policy: dataPolicy._id, employee: priya._id, status: "Pending" });
+  await PolicyAcknowledgement.create({ policy: dataPolicy._id, employee: arjun._id, status: "Acknowledged", acknowledgedAt: new Date() });
+
+  const wasteAudit = await Audit.create({
+    title: "Waste disposal audit",
+    department: manufacturing._id,
+    auditor: "GreenCheck Auditors",
+    scope: "Hazardous and non-hazardous waste handling",
+    scheduledDate: new Date("2026-06-01"),
+    completedDate: new Date("2026-06-10"),
+    status: "Completed",
+    findingsSummary: "Two minor non-conformities found in segregation labeling",
+  });
+
+  await Audit.create({
+    title: "Vendor ESG compliance audit",
+    department: logistics._id,
+    auditor: "Internal ESG Team",
+    scope: "Fleet vendor sustainability documentation",
+    scheduledDate: new Date("2026-08-15"),
+    status: "Scheduled",
+  });
+
+  await ComplianceIssue.create({
+    audit: wasteAudit._id,
+    severity: "High",
+    description: "Hazardous waste storage exceeded permitted duration",
+    owner: manager1._id,
+    dueDate: new Date("2026-07-05"),
+    status: "Open",
+  });
+
+  await ComplianceIssue.create({
+    audit: wasteAudit._id,
+    severity: "Medium",
+    description: "Segregation labels missing on 3 waste bins",
+    owner: admin1._id,
+    dueDate: new Date("2026-08-01"),
+    status: "InProgress",
   });
 
   await OrgConfig.create({ key: "global" });
